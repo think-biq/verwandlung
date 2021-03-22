@@ -6,8 +6,10 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 find_package(ZLIB REQUIRED)
+if( WIN32 ) # true if windows (32 and 64 bit)
 link_directories("C:\\Program Files\\zlib\\lib")
 #set_target_properties(ZLIB PROPERTIES COMPILE_DEFINITIONS BUILDER_STATIC_DEFINE)
+endif()
 
 include_directories (
 	"${PROJECT_SOURCE_DIR}/dep/SmallFBX/src/"
@@ -22,7 +24,11 @@ target_include_directories(SmallFBX PRIVATE
     ${ZLIB_INCLUDE_DIRS}
     ${SMALLFBX_SRC}
 )
+if( WIN32 ) # true if windows (32 and 64 bit)
 target_link_libraries (SmallFBX zlibstatic)
+else()
+target_link_libraries (SmallFBX z)
+endif()
 #set_target_properties(SmallFBX PROPERTIES COMPILE_DEFINITIONS BUILDER_STATIC_DEFINE)
 #install(TARGETS SmallFBX)
 

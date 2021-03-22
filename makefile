@@ -8,30 +8,30 @@
 
 DEBUG_FLAG =
 
+ifeq '$(findstring ;,$(PATH))' ';'
+	OS = "win"
+	STD_FLAG = "/std:c++17"
+	ZLIB_DIR = "/C/Program Files/zlib/lib"
+	ZLIB_NAME = zlibstatic
+	EXE_PATH = build/Release/./Verwandlung.exe
+else
+	OS = "unix-y"
+	STD_FLAG = "--std=c++17"
+	ZLIB_DIR = 
+	ZLIB_NAME = z
+	EXE_PATH = build/./Verwandlung
+endif
+
 setup:
 	mkdir -p ./tmp ./bin
 	mkdir -p ./build
-	# -DCMAKE_BUILD_TYPE=Release 
-	# -DSmallFBX_DIR=./dep/SmallFBX/src -DCMAKE_EXE_LINKER_FLAGS="-static" 
-	pushd ./build; cmake -DCMAKE_CXX_FLAGS="/std:c++17" ..
+	@echo $(OS) $(STD_FLAG) $(ZLIB_DIR) $(ZLIB_NAME) $(EXE_PATH)
+	pushd ./build; cmake -DCMAKE_CXX_FLAGS=$(STD_FLAG) ..
 
-# build-smallfbx:
-# 	pushd dep/SmallFBX/build; cmake -DCMAKE_EXE_LINKER_FLAGS="-static" --build . --config Release
+# build-wandel-cli:
+# 	clang++ --std=c++17 $(DEBUG_FLAG) -I./src -L./bin -L$(ZLIB_DIR) -L./dep/SmallFBX/build/SmallFBX/Release -lwandel -l$(ZLIB_NAME) -lSmallFBX ./src/cli.cpp -o ./bin/wandel
 
-build-wandel-lib:
-	echo "Narb"
-# 	clang++ --std=c++17 $(DEBUG_FLAG) -c -I./dep/SmallFBX/src -I./src ./src/wandel.cpp -o ./tmp/wandel.o
-# 	ar rc ./bin/libwandel.a ./tmp/wandel.o
-# 	mv ./bin/libwandel.a ./bin/wandel.lib
-
-# build-wandel-lib-dep: setup build-smallfbx build-wandel-lib
-build-wandel-lib-dep:
-	echo "Narb"
-
-build-wandel-cli:
-	clang++ --std=c++17 $(DEBUG_FLAG) -I./src -L./bin -L"/C/Program Files/zlib/lib" -L./dep/SmallFBX/build/SmallFBX/Release -lwandel -lzlibstatic -lSmallFBX ./src/cli.cpp -o ./bin/wandel
-
-build-wandel-cli-dep: build-wandel-lib build-wandel-cli
+# build-wandel-cli-dep: build-wandel-lib build-wandel-cli
 
 #build: build-wandel-lib-dep build-wandel-cli-dep
 build: setup
@@ -47,4 +47,4 @@ clean:
 clean-all: clean-smallfbx clean 
 
 run: build
-	build/Release/./Verwandlung.exe
+	$(EXE_PATH) --list ./etc/fbx/OldFace.fbx
