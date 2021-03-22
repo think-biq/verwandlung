@@ -1,2 +1,10 @@
+#
+#    Utility to extract blendshape / morph target information from FBX files.
+#
+#    2021-∞ (c) blurryroots innovation qanat OÜ. All rights reserved.
+#    See license.md for details.
+#
+#    https://think-biq.com
+
 bin/
 tmp/
