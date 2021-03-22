@@ -1,3 +1,3 @@
-[submodule "deb/SmallFBX"]
-	path = deb/SmallFBX
+[submodule "dep/SmallFBX"]
+	path = dep/SmallFBX
 	url = git@github.com:i-saint/SmallFBX.git
