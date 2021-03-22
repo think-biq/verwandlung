@@ -27,7 +27,6 @@ void Investigate(const sfbx::span<sfbx::Deformer*>& Deformers) {
 	std::cerr << "Detected " << Deformers.size() << " deformers." << std::endl;
 	for (size_t DeformerIndex = 0; DeformerIndex < Deformers.size(); ++DeformerIndex) {
 		sfbx::Deformer* Deformer = Deformers[DeformerIndex];
-		assert(Deformer);
 		std::cerr << "Deformer: " << Deformer << " seems legit ..." << std::endl;
 		const sfbx::Deformer& Keks = *Deformer;
 		std::cerr << "???: " << GetObjectSubClassName(Keks.getSubClass()) << std::endl;
@@ -79,7 +78,6 @@ void LookForMeshesAndBlendshapes(const sfbx::Object* Node, size_t Level = 0) {
 	const auto& Children = Node->getChildren();
 	for (size_t ChildIndex = 0; ChildIndex < Children.size(); ++ChildIndex) {
 		const auto* Child = Children[ChildIndex];
-		assert(Child);
 		LookForMeshesAndBlendshapes(Child, Level + 1);
 	}
 }
