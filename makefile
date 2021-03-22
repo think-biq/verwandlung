@@ -11,9 +11,12 @@ DEBUG_FLAG = -g
 setup:
 	mkdir -p ./tmp ./bin
 	mkdir -p dep/SmallFBX/build
-	pushd dep/SmallFBX/build; cmake ../src; cmake --build .
+	pushd dep/SmallFBX/build; cmake ../src;
 
-build-wandel-lib: setup
+build-smallfbx:
+	pushd dep/SmallFBX/build; cmake --build .
+
+build-wandel-lib: setup build-smallfbx
 	clang++ --std=c++17 $(DEBUG_FLAG) -c -I./dep/SmallFBX/src -I./src ./src/wandel.cpp -o ./tmp/wandel.o
 	ar rc ./bin/libwandel.a ./tmp/wandel.o
 
@@ -22,8 +25,13 @@ build-wandel-cli: build-wandel-lib
 
 build: build-wandel-lib build-wandel-cli
 
+clean-smallfbx:
+	rm -rf ./dep/SmallFBX/build
+
 clean:
 	rm -rf ./tmp ./bin
+
+clean-all: clean-smallfbx clean 
 
 run: build
 	bin/./wandel
