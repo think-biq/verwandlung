@@ -14,28 +14,38 @@ ifeq '$(findstring ;,$(PATH))' ';'
 	ZLIB_DIR = "/C/Program Files/zlib/lib"
 	ZLIB_NAME = zlibstatic
 	EXE_PATH = build/Release/./Verwandlung.exe
+	EXE_PATH_RAW = build/Release/Verwandlung.exe
+	LLDB = lldb
 else
 	OS = "unix-y"
 	STD_FLAG = "--std=c++17"
 	ZLIB_DIR = 
 	ZLIB_NAME = z
 	EXE_PATH = build/./Verwandlung
+	EXE_PATH_RAW = build/Verwandlung
+	LLDB = lldb
 endif
 
-setup:
+setup-env:
 	mkdir -p ./tmp ./bin
 	mkdir -p ./build
 	@echo $(OS) $(STD_FLAG) $(ZLIB_DIR) $(ZLIB_NAME) $(EXE_PATH)
+
+setup-cmake-release:
 	pushd ./build; cmake -DCMAKE_CXX_FLAGS=$(STD_FLAG) ..
 
-# build-wandel-cli:
-# 	clang++ --std=c++17 $(DEBUG_FLAG) -I./src -L./bin -L$(ZLIB_DIR) -L./dep/SmallFBX/build/SmallFBX/Release -lwandel -l$(ZLIB_NAME) -lSmallFBX ./src/cli.cpp -o ./bin/wandel
+setup-cmake-debug:
+	pushd ./build; cmake -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_CXX_FLAGS=$(STD_FLAG) ..
 
-# build-wandel-cli-dep: build-wandel-lib build-wandel-cli
+setup-release: setup-env setup-cmake-release
 
-#build: build-wandel-lib-dep build-wandel-cli-dep
-build: setup
+setup-debug: setup-env setup-cmake-debug
+
+build-release: setup-release
 	pushd ./build; cmake --build . --config Release
+
+build-debug: setup-debug
+	pushd ./build; cmake --build . --config Debug
 
 clean-smallfbx:
 	rm -rf ./dep/SmallFBX/build
@@ -46,5 +56,8 @@ clean:
 
 clean-all: clean-smallfbx clean 
 
-run: build
+run: build-release
 	$(EXE_PATH) --list ./etc/fbx/OldFace.fbx
+
+debug: build-debug
+	$(LLDB) -- $(EXE_PATH_RAW) --list ./etc/fbx/Gunan_animiated.fbx
