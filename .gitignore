@@ -10,3 +10,6 @@ bin/
 tmp/
 etc/
 build/
+
+#
+*.sublime-*
