@@ -6,36 +6,45 @@
 #
 #    https://think-biq.com
 
-DEBUG_FLAG =
+FILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+PROJECT_DIR := $(shell dirname $(FILE_PATH))
+PROJECT_NAME := $(notdir $(patsubst %/,%,$(dir $(FILE_PATH))))
+
+DEBUG_FLAG :=
+PYTHON := python3
 
 ifeq '$(findstring ;,$(PATH))' ';'
 	OS = "win"
 	STD_FLAG = "/std:c++17 /EHa"
-	ZLIB_DIR = "/C/Program Files/zlib/lib"
-	ZLIB_NAME = zlibstatic
 	EXE_PATH = build/Release/./Verwandlung.exe
 	EXE_PATH_RAW = build/Release/Verwandlung.exe
 	LLDB = lldb
+	PYTHON_EXECUTABLE := $(shell $(PYTHON) -c "import sys; print(sys.executable)")
 else
 	OS = "unix-y"
 	STD_FLAG = "--std=c++17"
-	ZLIB_DIR = 
-	ZLIB_NAME = z
 	EXE_PATH = build/./Verwandlung
 	EXE_PATH_RAW = build/Verwandlung
 	LLDB = lldb
+	PYTHON_EXECUTABLE := $(shell which $(PYTHON))
 endif
+
+.default: setup-env
 
 setup-env:
 	mkdir -p ./tmp ./bin
 	mkdir -p ./build
-	@echo $(OS) $(STD_FLAG) $(ZLIB_DIR) $(ZLIB_NAME) $(EXE_PATH)
+	@echo PROJECT_DIR:$(PROJECT_DIR)
+	@echo OS:$(OS)
+	@echo STD_FLAG:$(STD_FLAG)
+	@echo EXE_PATH: $(EXE_PATH)
+	@echo PYTHON_EXECUTABLE: $(PYTHON_EXECUTABLE)
 
 setup-cmake-release:
-	pushd ./build; cmake -DCMAKE_CXX_FLAGS=$(STD_FLAG) ..
+	pushd ./build; cmake -DPYTHON_EXECUTABLE=$(PYTHON_EXECUTABLE) -DCMAKE_CXX_FLAGS=$(STD_FLAG) ..
 
 setup-cmake-debug:
-	pushd ./build; cmake -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_CXX_FLAGS=$(STD_FLAG) ..
+	pushd ./build; cmake -DPYTHON_EXECUTABLE=$(PYTHON_EXECUTABLE) -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_CXX_FLAGS=$(STD_FLAG) ..
 
 setup-release: setup-env setup-cmake-release
 

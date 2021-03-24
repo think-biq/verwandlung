@@ -30,19 +30,27 @@ endif()
 file (GLOB WANDEL_SRC
 	"${PROJECT_SOURCE_DIR}/src/wandel/*.h"
 	"${PROJECT_SOURCE_DIR}/src/wandel/*.cpp")
-add_library (Wandel STATIC
+add_library (WandelLib STATIC
 	${WANDEL_SRC})
-target_include_directories(Wandel PRIVATE 
+target_include_directories(WandelLib PRIVATE 
     "${PROJECT_SOURCE_DIR}/dep/zlib"
     ${SMALLFBX_SRC}
 	${WANDEL_SRC}
 )
-target_link_libraries (Wandel SmallFBX)
+target_link_libraries (WandelLib SmallFBX)
 include_directories ("${PROJECT_SOURCE_DIR}/src/wandel")
 
+set(PYBIND_MODULE_NAME wandel)
+add_definitions(-DPYBIND_MODULE_NAME=${PYBIND_MODULE_NAME})
+add_subdirectory(dep/pybind11)
+include_directories (
+	"${PROJECT_SOURCE_DIR}/dep/pybind11/include")
+pybind11_add_module(${PYBIND_MODULE_NAME} "${PROJECT_SOURCE_DIR}/src/python/pywandel.cpp")
+target_link_libraries(${PYBIND_MODULE_NAME} PRIVATE pybind11::module pybind11::lto pybind11::windows_extras WandelLib)
+
 add_executable (Verwandlung "${PROJECT_SOURCE_DIR}/src/cli/main.cpp")
-target_link_libraries (Verwandlung Wandel)
-set_target_properties(Verwandlung Wandel PROPERTIES COMPILE_DEFINITIONS BUILDER_STATIC_DEFINE)
+target_link_libraries (Verwandlung WandelLib)
+set_target_properties(Verwandlung WandelLib PROPERTIES COMPILE_DEFINITIONS BUILDER_STATIC_DEFINE)
 target_include_directories(Verwandlung PRIVATE 
 	${WANDEL_SRC}
     ${SMALLFBX_SRC}
