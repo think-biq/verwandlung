@@ -1,9 +1,36 @@
+#.
+#.	Utility to inspect FBX files.
+#.
+#.  2021-∞ (c) blurryroots innovation qanat OÜ. All rights reserved.
+#.  See license.md for details.
+#.
+#.  https://think-biq.com
+
 CMAKE_MINIMUM_REQUIRED(VERSION 3.19)
 PROJECT(Verwandlung)
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE PATH "" FORCE)
 endif()
+
+# Check if we can declare inline declarations as hidden, to unify clang visiblity.
+# Thanks to https://github.com/Maroc-OS/retdec/pull/2/commits/0f90931787ee707a9579827b4869551cc4ab7de8
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
+		CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR
+		CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+	function(append_if condition value)
+	  if (${condition})
+	    foreach(variable ${ARGN})
+	      set(${variable} "${${variable}} ${value}" PARENT_SCOPE)
+	    endforeach(variable)
+	  endif()
+	endfunction()
+	include(CheckCXXCompilerFlag)
+	check_cxx_compiler_flag("-fvisibility-inlines-hidden" SUPPORTS_FVISIBILITY_INLINES_HIDDEN_FLAG)
+	append_if(SUPPORTS_FVISIBILITY_INLINES_HIDDEN_FLAG "-fvisibility-inlines-hidden" CMAKE_CXX_FLAGS)
+endif()
+
+include_directories ("${PROJECT_SOURCE_DIR}/dep/attr")
 
 add_subdirectory(dep/zlib)
 
@@ -22,23 +49,23 @@ target_include_directories(SmallFBX PRIVATE
     ${SMALLFBX_SRC}
 )
 if(WIN32)
-target_link_libraries (SmallFBX zlibstatic)
+target_link_libraries (SmallFBX PUBLIC zlibstatic)
 else()
-target_link_libraries (SmallFBX z)
+target_link_libraries (SmallFBX PUBLIC z)
 endif()
 
+set (WANDEL_SRC_DIR "${PROJECT_SOURCE_DIR}/src/wandel")
 file (GLOB WANDEL_SRC
-	"${PROJECT_SOURCE_DIR}/src/wandel/*.h"
-	"${PROJECT_SOURCE_DIR}/src/wandel/*.cpp")
-add_library (WandelLib STATIC
-	${WANDEL_SRC})
+	"${WANDEL_SRC_DIR}/*.h"
+	"${WANDEL_SRC_DIR}/*.cpp")
+add_library (WandelLib STATIC ${WANDEL_SRC})
+include_directories (${WANDEL_SRC_DIR})
 target_include_directories(WandelLib PRIVATE 
     "${PROJECT_SOURCE_DIR}/dep/zlib"
     ${SMALLFBX_SRC}
 	${WANDEL_SRC}
 )
-target_link_libraries (WandelLib SmallFBX)
-include_directories ("${PROJECT_SOURCE_DIR}/src/wandel")
+target_link_libraries (WandelLib PUBLIC SmallFBX)
 
 set(PYBIND_MODULE_NAME wandel)
 add_definitions(-DPYBIND_MODULE_NAME=${PYBIND_MODULE_NAME})
@@ -46,7 +73,7 @@ add_subdirectory(dep/pybind11)
 include_directories (
 	"${PROJECT_SOURCE_DIR}/dep/pybind11/include")
 pybind11_add_module(${PYBIND_MODULE_NAME} "${PROJECT_SOURCE_DIR}/src/python/pywandel.cpp")
-target_link_libraries(${PYBIND_MODULE_NAME} PRIVATE pybind11::module pybind11::lto pybind11::windows_extras WandelLib)
+target_link_libraries(${PYBIND_MODULE_NAME} PUBLIC SmallFBX WandelLib pybind11::module pybind11::lto pybind11::windows_extras)
 
 add_executable (Verwandlung "${PROJECT_SOURCE_DIR}/src/cli/main.cpp")
 target_link_libraries (Verwandlung WandelLib)
