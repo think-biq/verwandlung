@@ -28,6 +28,11 @@ enum WandelMode {
 struct WandelParams {
 	WandelMode Mode;
 	std::vector<std::string> Arguments;
+
+	WandelParams()
+		: Mode(WandelMode::Unknown)
+		, Arguments()
+	{}
 };
 
 bool Wandel(const std::string& Filepath, WandelParams Params);
