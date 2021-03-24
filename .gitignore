@@ -13,3 +13,6 @@ build/
 
 #
 *.sublime-*
+
+#
+.DS_Store
