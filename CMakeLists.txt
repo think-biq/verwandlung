@@ -8,8 +8,8 @@ endif()
 add_subdirectory(dep/zlib)
 
 include_directories (
-	"${PROJECT_SOURCE_DIR}/dep/SmallFBX/src/"
-	"${PROJECT_SOURCE_DIR}/dep/SmallFBX/src/SmallFBX/")
+	"${PROJECT_SOURCE_DIR}/dep/SmallFBX/src"
+	"${PROJECT_SOURCE_DIR}/dep/SmallFBX/src/SmallFBX")
 file(GLOB SMALLFBX_SRC 
 	"${PROJECT_SOURCE_DIR}/dep/SmallFBX/src/*.h"
 	"${PROJECT_SOURCE_DIR}/dep/SmallFBX/src/SmallFBX/*.h"
@@ -17,10 +17,11 @@ file(GLOB SMALLFBX_SRC
 add_library(SmallFBX STATIC 
 	${SMALLFBX_SRC})
 target_include_directories(SmallFBX PRIVATE 
-    ${ZLIB_INCLUDE_DIRS}
+    "${PROJECT_SOURCE_DIR}/dep/zlib"
+    "${PROJECT_SOURCE_DIR}/build/dep/zlib"
     ${SMALLFBX_SRC}
 )
-if( WIN32 )
+if(WIN32)
 target_link_libraries (SmallFBX zlibstatic)
 else()
 target_link_libraries (SmallFBX z)
@@ -32,6 +33,7 @@ file (GLOB WANDEL_SRC
 add_library (Wandel STATIC
 	${WANDEL_SRC})
 target_include_directories(Wandel PRIVATE 
+    "${PROJECT_SOURCE_DIR}/dep/zlib"
     ${SMALLFBX_SRC}
 	${WANDEL_SRC}
 )
