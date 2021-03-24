@@ -1,5 +1,5 @@
 /*
-    Utility to extract blendshape / morph target information from FBX files.
+    Utility to inspect FBX files.
 
     2021-∞ (c) blurryroots innovation qanat OÜ. All rights reserved.
     See license.md for details.

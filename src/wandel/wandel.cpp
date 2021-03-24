@@ -19,11 +19,15 @@
 #include <SmallFBX.h>
 #include <wandel.hpp>
 
+#include <macos/attr.h>
+
+ATTRIBUTE_HIDDEN
 void Investigate(const sfbx::BlendShapeChannel* Channel) {
 	const auto& Data = Channel->getShapeData();
 	std::cerr << "Found channel: " << Channel->getName() << " containing " << Data.size() << " entries." << std::endl;
 }
 
+ATTRIBUTE_HIDDEN
 void Investigate(const sfbx::span<sfbx::Deformer*>& Deformers) {
 	std::cerr << "Detected " << Deformers.size() << " deformers." << std::endl;
 	for (size_t DeformerIndex = 0; DeformerIndex < Deformers.size(); ++DeformerIndex) {
@@ -48,6 +52,7 @@ void Investigate(const sfbx::span<sfbx::Deformer*>& Deformers) {
 	}
 }
 
+ATTRIBUTE_HIDDEN
 void LookForBlendshape(const sfbx::Geometry* Geometry) {
 	if (nullptr == Geometry) {
 		return;
@@ -64,6 +69,7 @@ void LookForBlendshape(const sfbx::Geometry* Geometry) {
 	Investigate(Deformers);
 }
 
+ATTRIBUTE_HIDDEN
 void LookForMeshesAndBlendshapes(const sfbx::Object* Node, size_t Level = 0) {
 	std::cout << "Checking node: " << Node->getName() << " with types: "
 					<< sfbx::GetObjectClassName(Node->getClass())
@@ -83,6 +89,7 @@ void LookForMeshesAndBlendshapes(const sfbx::Object* Node, size_t Level = 0) {
 	}
 }
 
+ATTRIBUTE_HIDDEN
 bool ExportCurvesFrom(const sfbx::AnimationLayer* Layer, sfbx::ObjectSubClass ClassToConsider) {
 	bool bHasBlendshapes = false;
 	const auto& CurveNodes = Layer->getAnimationCurveNodes();
@@ -141,6 +148,7 @@ bool ExportCurvesFrom(const sfbx::AnimationLayer* Layer, sfbx::ObjectSubClass Cl
 	return bHasBlendshapes;
 }
 
+ATTRIBUTE_HIDDEN
 void ShowInfo(const sfbx::Object* Object, std::ostream& o, bool bRecurse = false, size_t Level = 0, bool bExcludeSelf = false, bool bAppendLinebreak = true) {
 	bool bValidObject = nullptr != Object;
 
@@ -171,6 +179,7 @@ void ShowInfo(const sfbx::Object* Object, std::ostream& o, bool bRecurse = false
 	}
 }
 
+ATTRIBUTE_HIDDEN
 bool ListBlendshapesFrom(const sfbx::AnimationLayer* Layer, sfbx::ObjectSubClass ClassToConsider, size_t Verbosity = 0) {
 	bool bHasBlendshapes = false;
 	std::ostream& o = std::cout;
@@ -200,10 +209,12 @@ bool ListBlendshapesFrom(const sfbx::AnimationLayer* Layer, sfbx::ObjectSubClass
 	return bHasBlendshapes;
 }
 
-
+ATTRIBUTE_HIDDEN
 inline bool CompareCharactersCaseInsesitive(char a, char b) {
     return std::tolower(a) == std::tolower(b);
 }
+
+ATTRIBUTE_HIDDEN
 inline bool CompareCharacters(char a, char b) {
     return a == b;
 }
