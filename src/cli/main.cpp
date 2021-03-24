@@ -16,23 +16,29 @@ int main (int ArgC, char** ArgV) {
 	//std::locale::global(std::locale("en_US.utf8"));
 
 	std::string Filepath;
-	biq::Verwandlung::WandelMode Mode;
+	biq::Verwandlung::WandelParams Params;
 
+	int LastArgIndex = ArgC - 1;
 	if (1 < ArgC) {
 		if (2 < ArgC) {
 			std::string option(ArgV[1]);
 			if (biq::Compare(option, "--list")) {
-				Mode = biq::Verwandlung::WandelMode::List;
+				Params.Mode = biq::Verwandlung::WandelMode::List;
 			}
 			else if (biq::Compare(option, "--export")) {
-				Mode = biq::Verwandlung::WandelMode::Export;
+				Params.Mode = biq::Verwandlung::WandelMode::Export;
 			}
 			else {
-				Mode = biq::Verwandlung::WandelMode::Unknown;
+				Params.Mode = biq::Verwandlung::WandelMode::Unknown;
+			}
+
+			if (2 < LastArgIndex) {
+				// Fetch which type of export: morph, bone, mesh
+				Params.Arguments.push_back(biq::ToLower(std::string(ArgV[2])));
 			}
 		}
 
-		Filepath = std::string(ArgV[ArgC - 1]);
+		Filepath = std::string(ArgV[LastArgIndex]);
 	}
 
 	if (Filepath.empty()) {
@@ -40,7 +46,7 @@ int main (int ArgC, char** ArgV) {
 		return 0;
 	}
 
-	bool bSuccess = biq::Verwandlung::Wandel(Filepath, Mode);
+	bool bSuccess = biq::Verwandlung::Wandel(Filepath, Params);
 
 	return bSuccess ? 0 : 3;
 }

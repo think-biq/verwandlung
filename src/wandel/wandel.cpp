@@ -8,6 +8,7 @@
 */
 
 #include <iostream>
+#include <ostream>
 #include <map>
 #include <string>
 #include <vector>
@@ -82,20 +83,27 @@ void LookForMeshesAndBlendshapes(const sfbx::Object* Node, size_t Level = 0) {
 	}
 }
 
-bool ExportBlendshapesFrom(const sfbx::AnimationLayer* Layer) {
+bool ExportCurvesFrom(const sfbx::AnimationLayer* Layer, sfbx::ObjectSubClass ClassToConsider) {
 	bool bHasBlendshapes = false;
 	const auto& CurveNodes = Layer->getAnimationCurveNodes();
 	std::cout << "{ \"count\": " << CurveNodes.size() << ", \"shapes\": [";
 	for (size_t CurveNodeIndex = 0; CurveNodeIndex < CurveNodes.size(); ++CurveNodeIndex) {
-		const auto& CurveNode = CurveNodes[CurveNodeIndex];
+		const auto& CurveNode = CurveNodes[CurveNodeIndex]; // BlendShapeChannel
+
 		const auto& CurveName = CurveNode->getName();
 		const auto& Curves = CurveNode->getAnimationCurves();
-		if (sfbx::ObjectSubClass::BlendShapeChannel == CurveNode->getAnimationTarget()->getSubClass()) {
+		if (ClassToConsider == CurveNode->getAnimationTarget()->getSubClass()) {
+			if (bHasBlendshapes) {
+				std::cout << ", ";
+			}
+
 			bHasBlendshapes = true;
+
 			std::cout << "{" << "\"name\": \"" << CurveName << "\", \"target\": \"" << CurveNode->getAnimationTarget()->getChild()->getName() << "\", \"curves\": [";
 			for (size_t CurveIndex = 0; CurveIndex < Curves.size(); ++CurveIndex) {
 				const auto& Curve = Curves[CurveIndex];
 				std::cout << "{" << "\"name\": \"" << Curve->getName() << "\"";
+				std::cout << "," << "\"link\": \"" << Curve->getLinkName() << "\"";
 				std::cout << ", \"start_time\": " << Curve->getStartTime();
 				std::cout << ", \"end_time\": " << Curve->getStopTime();
 				{
@@ -126,9 +134,6 @@ bool ExportBlendshapesFrom(const sfbx::AnimationLayer* Layer) {
 				}
 			}
 			std::cout << "]}";
-			if ((CurveNodeIndex + 1) < CurveNodes.size()) {
-				std::cout << ", ";
-			}
 		}
 	}
 	std::cout << "]}";
@@ -136,16 +141,59 @@ bool ExportBlendshapesFrom(const sfbx::AnimationLayer* Layer) {
 	return bHasBlendshapes;
 }
 
-bool ListBlendshapesFrom(const sfbx::AnimationLayer* Layer) {
+void ShowInfo(const sfbx::Object* Object, std::ostream& o, bool bRecurse = false, size_t Level = 0, bool bExcludeSelf = false, bool bAppendLinebreak = true) {
+	bool bValidObject = nullptr != Object;
+
+	if (false == bExcludeSelf) {
+		for (size_t LevelIndex = 0; LevelIndex < Level; ++LevelIndex)
+			o << "\t";
+
+		if (false == bValidObject) {
+			o << "Null Object!";
+		}
+		else {
+			o << "Object[" << Object->getID() << "]: " << Object->getName()
+				<< " (" << sfbx::GetObjectClassName(Object->getClass())
+				<< "/" << sfbx::GetObjectSubClassName(Object->getSubClass())
+				<< ")"
+				;
+		}
+
+		if (bAppendLinebreak)
+			o << std::endl;
+	}
+
+	if (bValidObject && bRecurse) {
+		const auto& Children = Object->getChildren();
+		for (size_t ChildIndex = 0; ChildIndex < Children.size(); ++ChildIndex) {
+			ShowInfo(Children[ChildIndex], o, true, Level + 1);
+		}
+	}
+}
+
+bool ListBlendshapesFrom(const sfbx::AnimationLayer* Layer, sfbx::ObjectSubClass ClassToConsider, size_t Verbosity = 0) {
 	bool bHasBlendshapes = false;
+	std::ostream& o = std::cout;
 	const auto& CurveNodes = Layer->getAnimationCurveNodes();
 	for (size_t CurveNodeIndex = 0; CurveNodeIndex < CurveNodes.size(); ++CurveNodeIndex) {
 		const auto& CurveNode = CurveNodes[CurveNodeIndex];
 		const auto& CurveName = CurveNode->getName();
 		const auto& Curves = CurveNode->getAnimationCurves();
-		if (sfbx::ObjectSubClass::BlendShapeChannel == CurveNode->getAnimationTarget()->getSubClass()) {
-			std::cout << CurveNode->getAnimationTarget()->getChild()->getName() << std::endl;
+		if (ClassToConsider == CurveNode->getAnimationTarget()->getSubClass()) {
+			
 			bHasBlendshapes = true;
+
+			if (0 < Verbosity) {
+				o << "MATCH: ";
+			}
+			o << CurveNode->getAnimationTarget()->getChild()->getName() << std::endl;
+			if (0 < Verbosity) {
+				ShowInfo(CurveNode, o, false, 0, false, false); o << ": " << std::endl;
+				o << "Target info: "; ShowInfo(CurveNode->getAnimationTarget(), o, false, 0, false, true);
+				o << "\tTarget Parent: "; ShowInfo(CurveNode->getAnimationTarget()->getParent(), o, false, 0, false, true);
+				o << "\tTarget Children: " << std::endl;
+				ShowInfo(CurveNode->getAnimationTarget(), o, 1 < Verbosity, 2, false, true);
+			}
 		}
 	}
 
@@ -182,30 +230,54 @@ std::string ToLower(const std::string_view& Input) {
 
 namespace Verwandlung {
 
-bool Wandel(const std::string& Filepath, WandelMode Mode) {
+bool Wandel(const std::string& Filepath, WandelParams Params) {
+	std::cerr << "Opening file at: " << Filepath << std::endl;
+
 	sfbx::DocumentPtr doc = sfbx::MakeDocument(Filepath);
 
-	const auto& as = doc->getAnimationStacks();
+	const sfbx::span<sfbx::AnimationStack*>& as = doc->getAnimationStacks();
 	if (0 == as.size()) {
 		std::cerr << "No animation stack present!" << std::endl;
 		return false;
 	}
 
-	const auto& stack = as[0];
-	const auto& Layers = stack->getAnimationLayers();
+	std::cerr << "Animation stacks: " << as.size() << std::endl;
+
+	const sfbx::AnimationStack* PrimeStack = as[0];
+	const sfbx::span<sfbx::AnimationLayer*>& Layers = PrimeStack->getAnimationLayers();
 	if (0 == Layers.size()) {
 		std::cerr << "No animation layer present!" << std::endl;
 		return false;
 	}
 
+	std::cerr << "Animation layers: " << Layers.size() << std::endl;
+
+	sfbx::ObjectSubClass MatchType = sfbx::ObjectSubClass::BlendShapeChannel;
+	if (0 < Params.Arguments.size()) {
+		if (biq::Compare(Params.Arguments[0], "morph")) {
+			MatchType = sfbx::ObjectSubClass::BlendShapeChannel;
+		}
+		else if (biq::Compare(Params.Arguments[0], "bone")) {
+			MatchType = sfbx::ObjectSubClass::LimbNode;
+		}
+		else if (biq::Compare(Params.Arguments[0], "mesh")) {
+			MatchType = sfbx::ObjectSubClass::Mesh;
+		}
+		else {
+			std::cerr << "Unknown match type "
+				<< sfbx::GetObjectSubClassName(MatchType)
+				<< " setting to morps ..." << std::endl;
+		}
+	}
+
 	bool bSuccess = true;
-	const auto& Layer = Layers[0];
-	switch(Mode) {
+	const sfbx::AnimationLayer* PrimeLayer = Layers[0];
+	switch(Params.Mode) {
 		case WandelMode::List:
-			bSuccess = ListBlendshapesFrom(Layer);
+			bSuccess = ListBlendshapesFrom(PrimeLayer, MatchType, 0);
 		break;
 		case WandelMode::Export:
-			bSuccess = ExportBlendshapesFrom(Layer);
+			bSuccess = ExportCurvesFrom(PrimeLayer, MatchType);
 		break;
 		default:
 			std::cerr << "Unknown mode :/" << std::endl;

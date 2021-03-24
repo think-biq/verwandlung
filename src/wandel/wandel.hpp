@@ -9,6 +9,7 @@
 
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace biq {
 
@@ -24,7 +25,12 @@ enum WandelMode {
 	Export
 };
 
-bool Wandel(const std::string& Filepath, WandelMode Mode);
+struct WandelParams {
+	WandelMode Mode;
+	std::vector<std::string> Arguments;
+};
+
+bool Wandel(const std::string& Filepath, WandelParams Params);
 
 }
 
