@@ -1,1 +1,9 @@
+#
+#    Utility to inspect FBX files.
+#
+#    2021-∞ (c) blurryroots innovation qanat OÜ. All rights reserved.
+#    See license.md for details.
+#
+#    https://think-biq.com
+
 *.fbx filter=lfs diff=lfs merge=lfs -text
