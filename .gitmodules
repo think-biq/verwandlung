@@ -1,7 +1,7 @@
 [submodule "dep/SmallFBX"]
 	ignore = dirty
 	path = dep/SmallFBX
-	url = https://github.com/i-saint/SmallFBX.git
+	url = https://github.com/think-biq/SmallFBX.git
 [submodule "dep/zlib"]
 	ignore = dirty
 	path = dep/zlib
