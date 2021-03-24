@@ -10,7 +10,7 @@ DEBUG_FLAG =
 
 ifeq '$(findstring ;,$(PATH))' ';'
 	OS = "win"
-	STD_FLAG = "/std:c++17 /EHsc"
+	STD_FLAG = "/std:c++17 /EHa"
 	ZLIB_DIR = "/C/Program Files/zlib/lib"
 	ZLIB_NAME = zlibstatic
 	EXE_PATH = build/Release/./Verwandlung.exe
