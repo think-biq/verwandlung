@@ -11,7 +11,6 @@ PROJECT_DIR := $(shell dirname $(FILE_PATH))
 PROJECT_NAME := $(notdir $(patsubst %/,%,$(dir $(FILE_PATH))))
 
 DEBUG_FLAG :=
-PYTHON := python3
 
 ifeq '$(findstring ;,$(PATH))' ';'
 	OS = "win"
@@ -19,13 +18,15 @@ ifeq '$(findstring ;,$(PATH))' ';'
 	EXE_PATH = build/Release/./Verwandlung.exe
 	EXE_PATH_RAW = build/Release/Verwandlung.exe
 	LLDB = lldb
-	PYTHON_EXECUTABLE := $(shell $(PYTHON) -c "import sys; print(sys.executable)")
+	PYTHON = python
+	PYTHON_EXECUTABLE := "${shell $(PYTHON) -c "import sys; print(sys.executable)"}"
 else
 	OS = "unix-y"
 	STD_FLAG = "--std=c++17"
 	EXE_PATH = build/./Verwandlung
 	EXE_PATH_RAW = build/Verwandlung
 	LLDB = lldb
+	PYTHON := python3
 	PYTHON_EXECUTABLE := $(shell which $(PYTHON))
 endif
 
