@@ -6,3 +6,7 @@
 	ignore = dirty
 	path = dep/zlib
 	url = https://github.com/madler/zlib.git
+[submodule "dep/pybind11"]
+	path = dep/pybind11
+	url = https://github.com/pybind/pybind11.git
+	branch = stable
