@@ -1,7 +1,7 @@
 import io
 from contextlib import redirect_stdout
 from io import StringIO 
-from .wandel import Wandel as wandel_raw
+from .wandel import Wandel as wandel
 from .wandel import WandelMode, WandelParams
 
 __all__ = ['wandel', 'WandelMode', 'WandelParams']
