@@ -73,8 +73,12 @@ target_include_directories (WandelLib PRIVATE
 target_link_libraries (WandelLib PUBLIC SmallFBX)
 
 set (PYBIND_MODULE_NAME wandel)
-execute_process(COMMAND python3-config --extension-suffix
+if (WIN32)
+	set (pybind11_LIB_SUFFIX .cp39-win_amd64.pyd)
+else ()
+execute_process(COMMAND PYTHON tools/python3-config --extension-suffix
                 OUTPUT_VARIABLE pybind11_LIB_SUFFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif ()
 set (PYBIND_LIBRARY_NAME "${PYBIND_MODULE_NAME}${pybind11_LIB_SUFFIX}")
 if (WIN32)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -108,7 +112,6 @@ add_custom_command(
     TARGET ${PYBIND_MODULE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E rm
             "${CMAKE_CURRENT_BINARY_DIR}/Release/${PYBIND_LIBRARY_NAME}")
-execute_process(COMMAND ls -lav "${WANDEL_MODULE_OUTPATH}/setup.py" bdist_wheel)
 
 add_executable (Verwandlung "${PROJECT_SOURCE_DIR}/src/cli/main.cpp")
 target_link_libraries (Verwandlung WandelLib)
