@@ -13,6 +13,11 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE PATH "" FORCE)
 endif()
 
+#[[add_custom_target(
+    print_build_type 
+    COMMAND ${CMAKE_COMMAND} -E echo $<$<CONFIG:>:Undefined>$<$<NOT:$<CONFIG:>>:$<CONFIG>>
+)]]
+
 # Check if we can declare inline declarations as hidden, to unify clang visiblity.
 # Thanks to https://github.com/Maroc-OS/retdec/pull/2/commits/0f90931787ee707a9579827b4869551cc4ab7de8
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
@@ -71,6 +76,18 @@ set (PYBIND_MODULE_NAME wandel)
 execute_process(COMMAND python3-config --extension-suffix
                 OUTPUT_VARIABLE pybind11_LIB_SUFFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
 set (PYBIND_LIBRARY_NAME "${PYBIND_MODULE_NAME}${pybind11_LIB_SUFFIX}")
+if (WIN32)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	set (WANDEL_MODULE_OUTPATH "${CMAKE_CURRENT_BINARY_DIR}/Debug/wandel")
+	set (WANDEL_PYBIND_LIBRARY_FILEPATH "${CMAKE_CURRENT_BINARY_DIR}/Debug/${PYBIND_LIBRARY_NAME}")
+else ()
+	set (WANDEL_MODULE_OUTPATH "${CMAKE_CURRENT_BINARY_DIR}/Release/wandel")
+	set (WANDEL_PYBIND_LIBRARY_FILEPATH "${CMAKE_CURRENT_BINARY_DIR}/Release/${PYBIND_LIBRARY_NAME}")
+endif ()
+else ()
+	set (WANDEL_MODULE_OUTPATH "${CMAKE_CURRENT_BINARY_DIR}/wandel")
+	set (WANDEL_PYBIND_LIBRARY_FILEPATH "${CMAKE_CURRENT_BINARY_DIR}/${PYBIND_LIBRARY_NAME}")
+endif ()
 add_definitions (-DPYBIND_MODULE_NAME=${PYBIND_MODULE_NAME})
 add_subdirectory (dep/pybind11)
 include_directories (
@@ -81,17 +98,17 @@ add_custom_command(
     TARGET ${PYBIND_MODULE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_SOURCE_DIR}/python
-            ${CMAKE_CURRENT_BINARY_DIR}/wandel)
+            "${WANDEL_MODULE_OUTPATH}")
 add_custom_command(
     TARGET ${PYBIND_MODULE_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${CMAKE_CURRENT_BINARY_DIR}/${PYBIND_LIBRARY_NAME}"
-            "${CMAKE_CURRENT_BINARY_DIR}/wandel/src/wandel_cli")
+    COMMAND ${CMAKE_COMMAND} -E copy
+            "${WANDEL_PYBIND_LIBRARY_FILEPATH}"
+            "${WANDEL_MODULE_OUTPATH}/src/wandel_cli")
 add_custom_command(
     TARGET ${PYBIND_MODULE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E rm
-            "${CMAKE_CURRENT_BINARY_DIR}/${PYBIND_LIBRARY_NAME}")
-execute_process(COMMAND ls -lav "${CMAKE_CURRENT_BINARY_DIR}/wandel/setup.py" bdist_wheel)
+            "${CMAKE_CURRENT_BINARY_DIR}/Release/${PYBIND_LIBRARY_NAME}")
+execute_process(COMMAND ls -lav "${WANDEL_MODULE_OUTPATH}/setup.py" bdist_wheel)
 
 add_executable (Verwandlung "${PROJECT_SOURCE_DIR}/src/cli/main.cpp")
 target_link_libraries (Verwandlung WandelLib)

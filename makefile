@@ -15,7 +15,7 @@ BUILD_PATH = "${PROJECT_DIR}/build"
 
 ifeq '$(findstring ;,$(PATH))' ';'
 	OS = "win"
-	VENV_BIN_DIR = "$(PROJECT_DIR)/Scripts"
+	VENV_BIN_DIR = Scripts
 	STD_FLAG = "/std:c++17 /EHa"
 	EXE_NAME = Verwandlung.exe
 	BUILD_PATH_RELEASE = "${BUILD_PATH}/Release"
@@ -27,7 +27,7 @@ ifeq '$(findstring ;,$(PATH))' ';'
 	PYTHON_EXECUTABLE := "${shell $(PYTHON) -c "import sys; print(sys.executable)"}"
 else
 	OS = "unix-y"
-	VENV_BIN_DIR = "$(PROJECT_DIR)/bin/activate"
+	VENV_BIN_DIR = bin
 	STD_FLAG = "--std=c++17"
 	EXE_NAME = Verwandlung
 	BUILD_PATH_RELEASE = "${BUILD_PATH}"
@@ -38,6 +38,8 @@ else
 	PYTHON := python3
 	PYTHON_EXECUTABLE := $(shell which $(PYTHON))
 endif
+
+CMD_ACTIVATE_VENV = . "$(PROJECT_DIR)/$(VENV_BIN_DIR)/activate"
 
 
 default: build
@@ -50,7 +52,7 @@ $(VENV_BIN_DIR): # creates target which only gets triggered if directory does no
 venv-upgrade: $(VENV_BIN_DIR)
 	@echo "Upgrading venv ..."
 	@$(PYTHON) -m venv --upgrade "$(PROJECT_DIR)"
-	@. "$(PROJECT_DIR)/bin/activate"; $(PYTHON) -m pip install -U -r "$(PROJECT_DIR)/requirements.txt"
+	@$(CMD_ACTIVATE_VENV); $(PYTHON) -m pip install -U -r "$(PROJECT_DIR)/requirements.txt"
 
 venv-remove: 
 	@echo "Removing venv ..."
@@ -59,8 +61,11 @@ venv-remove:
 	@rm -rf "$(PROJECT_DIR)/lib"
 	@rm -rf "$(PROJECT_DIR)/pyvenv.cfg"
 
+list-venv-version:
+	@$(CMD_ACTIVATE_VENV); $(PYTHON) -V
+
 list-venv-packages:
-	@. "$(PROJECT_DIR)/bin/activate"; $(PYTHON) -m pip list
+	@$(CMD_ACTIVATE_VENV); $(PYTHON) -m pip list
 
 setup-env: venv-upgrade
 	mkdir -p ./tmp ./bin
@@ -72,27 +77,27 @@ setup-env: venv-upgrade
 	@echo PYTHON_EXECUTABLE: $(PYTHON_EXECUTABLE)
 
 setup-cmake-release:
-	pushd "${BUILD_PATH}"; . "${VENV_BIN_DIR}"; cmake -DPYTHON_EXECUTABLE=$(PYTHON_EXECUTABLE) -DCMAKE_CXX_FLAGS=$(STD_FLAG) ..
+	pushd "${BUILD_PATH}"; $(CMD_ACTIVATE_VENV); cmake -DPYTHON_EXECUTABLE=$(PYTHON_EXECUTABLE) -DCMAKE_CXX_FLAGS=$(STD_FLAG) ..
 
 setup-cmake-debug:
-	pushd "${BUILD_PATH}"; . "${VENV_BIN_DIR}"; cmake -DPYTHON_EXECUTABLE=$(PYTHON_EXECUTABLE) -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_CXX_FLAGS=$(STD_FLAG) ..
+	pushd "${BUILD_PATH}"; $(CMD_ACTIVATE_VENV); cmake -DPYTHON_EXECUTABLE=$(PYTHON_EXECUTABLE) -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_CXX_FLAGS=$(STD_FLAG) ..
 
 setup-release: setup-env setup-cmake-release
 
 setup-debug: setup-env setup-cmake-debug
 
 build-release: setup-release
-	pushd "${BUILD_PATH}"; . "${VENV_BIN_DIR}"; cmake --build . --config Release
+	pushd "${BUILD_PATH}"; $(CMD_ACTIVATE_VENV); cmake --build . --config Release
 
 build-debug: setup-debug
-	pushd "${BUILD_PATH}"; . "${VENV_BIN_DIR}"; cmake --build . --config Debug
+	pushd "${BUILD_PATH}"; $(CMD_ACTIVATE_VENV); cmake --build . --config Debug
 
 build-wheel-release:
-	@pushd "${BUILD_PATH_RELEASE}/wandel"; . "${VENV_BIN_DIR}"; $(PYTHON) setup.py bdist_wheel
+	@pushd "${BUILD_PATH_RELEASE}/wandel"; $(CMD_ACTIVATE_VENV); $(PYTHON) setup.py bdist_wheel
 
 build-wheel-debug:
 	echo "WOOT?"
-	@pushd "${BUILD_PATH_DEBUG}/wandel"; . "${VENV_BIN_DIR}"; $(PYTHON) setup.py bdist_wheel
+	@pushd "${BUILD_PATH_DEBUG}/wandel"; $(CMD_ACTIVATE_VENV); $(PYTHON) setup.py bdist_wheel
 
 clean:
 	@echo "Removing build artefacts ..."
