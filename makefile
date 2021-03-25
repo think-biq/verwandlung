@@ -12,6 +12,7 @@ PROJECT_NAME := $(notdir $(patsubst %/,%,$(dir $(FILE_PATH))))
 
 DEBUG_FLAG :=
 BUILD_PATH = "${PROJECT_DIR}/build"
+PYBIND_WANDEL_MODULE_NAME = pywandel
 
 ifeq '$(findstring ;,$(PATH))' ';'
 	OS = "win"
@@ -77,27 +78,27 @@ setup-env: venv-upgrade
 	@echo PYTHON_EXECUTABLE: $(PYTHON_EXECUTABLE)
 
 setup-cmake-release:
-	pushd "${BUILD_PATH}"; $(CMD_ACTIVATE_VENV); cmake -DPYTHON_EXECUTABLE=$(PYTHON_EXECUTABLE) -DCMAKE_CXX_FLAGS=$(STD_FLAG) ..
+	pushd ${BUILD_PATH}; $(CMD_ACTIVATE_VENV); cmake -DPYTHON=$(PYTHON) -DPYBIND_MODULE_NAME=${PYBIND_WANDEL_MODULE_NAME} -DPYTHON_EXECUTABLE=$(PYTHON_EXECUTABLE) -DCMAKE_CXX_FLAGS=$(STD_FLAG) ..
 
 setup-cmake-debug:
-	pushd "${BUILD_PATH}"; $(CMD_ACTIVATE_VENV); cmake -DPYTHON_EXECUTABLE=$(PYTHON_EXECUTABLE) -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_CXX_FLAGS=$(STD_FLAG) ..
+	pushd ${BUILD_PATH}; $(CMD_ACTIVATE_VENV); cmake -DPYTHON=$(PYTHON) -DPYBIND_MODULE_NAME=${PYBIND_WANDEL_MODULE_NAME} -DPYTHON_EXECUTABLE=$(PYTHON_EXECUTABLE) -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_CXX_FLAGS=$(STD_FLAG) ..
 
 setup-release: setup-env setup-cmake-release
 
 setup-debug: setup-env setup-cmake-debug
 
 build-release: setup-release
-	pushd "${BUILD_PATH}"; $(CMD_ACTIVATE_VENV); cmake --build . --config Release
+	pushd ${BUILD_PATH}; $(CMD_ACTIVATE_VENV); cmake --build . --config Release
 
 build-debug: setup-debug
-	pushd "${BUILD_PATH}"; $(CMD_ACTIVATE_VENV); cmake --build . --config Debug
+	pushd ${BUILD_PATH}; $(CMD_ACTIVATE_VENV); cmake --build . --config Debug
 
 build-wheel-release:
-	@pushd "${BUILD_PATH_RELEASE}/wandel"; $(CMD_ACTIVATE_VENV); $(PYTHON) setup.py bdist_wheel
+	@pushd "${BUILD_PATH_RELEASE}/${PYBIND_WANDEL_MODULE_NAME}"; $(CMD_ACTIVATE_VENV); $(PYTHON) setup.py bdist_wheel
 
 build-wheel-debug:
 	echo "WOOT?"
-	@pushd "${BUILD_PATH_DEBUG}/wandel"; $(CMD_ACTIVATE_VENV); $(PYTHON) setup.py bdist_wheel
+	@pushd "${BUILD_PATH_DEBUG}/${PYBIND_WANDEL_MODULE_NAME}"; $(CMD_ACTIVATE_VENV); $(PYTHON) setup.py bdist_wheel
 
 clean:
 	@echo "Removing build artefacts ..."

@@ -13,11 +13,6 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE PATH "" FORCE)
 endif()
 
-#[[add_custom_target(
-    print_build_type 
-    COMMAND ${CMAKE_COMMAND} -E echo $<$<CONFIG:>:Undefined>$<$<NOT:$<CONFIG:>>:$<CONFIG>>
-)]]
-
 # Check if we can declare inline declarations as hidden, to unify clang visiblity.
 # Thanks to https://github.com/Maroc-OS/retdec/pull/2/commits/0f90931787ee707a9579827b4869551cc4ab7de8
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
@@ -72,24 +67,25 @@ target_include_directories (WandelLib PRIVATE
 )
 target_link_libraries (WandelLib PUBLIC SmallFBX)
 
-set (PYBIND_MODULE_NAME wandel)
+set (PYBIND_MODULE_NAME ${PYBIND_WANDEL_MODULE_NAME})
 if (WIN32)
 	set (pybind11_LIB_SUFFIX .cp39-win_amd64.pyd)
 else ()
-execute_process(COMMAND PYTHON tools/python3-config --extension-suffix
-                OUTPUT_VARIABLE pybind11_LIB_SUFFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
+#[[execute_process(COMMAND PYTHON tools/python3-config --extension-suffix
+                OUTPUT_VARIABLE pybind11_LIB_SUFFIX OUTPUT_STRIP_TRAILING_WHITESPACE)]]
+    set (pybind11_LIB_SUFFIX .cpython-39-darwin.so)
 endif ()
 set (PYBIND_LIBRARY_NAME "${PYBIND_MODULE_NAME}${pybind11_LIB_SUFFIX}")
 if (WIN32)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-	set (WANDEL_MODULE_OUTPATH "${CMAKE_CURRENT_BINARY_DIR}/Debug/wandel")
+	set (WANDEL_MODULE_OUTPATH "${CMAKE_CURRENT_BINARY_DIR}/Debug/${PYBIND_MODULE_NAME}")
 	set (WANDEL_PYBIND_LIBRARY_FILEPATH "${CMAKE_CURRENT_BINARY_DIR}/Debug/${PYBIND_LIBRARY_NAME}")
 else ()
-	set (WANDEL_MODULE_OUTPATH "${CMAKE_CURRENT_BINARY_DIR}/Release/wandel")
+	set (WANDEL_MODULE_OUTPATH "${CMAKE_CURRENT_BINARY_DIR}/Release/${PYBIND_MODULE_NAME}")
 	set (WANDEL_PYBIND_LIBRARY_FILEPATH "${CMAKE_CURRENT_BINARY_DIR}/Release/${PYBIND_LIBRARY_NAME}")
 endif ()
 else ()
-	set (WANDEL_MODULE_OUTPATH "${CMAKE_CURRENT_BINARY_DIR}/wandel")
+	set (WANDEL_MODULE_OUTPATH "${CMAKE_CURRENT_BINARY_DIR}/${PYBIND_MODULE_NAME}")
 	set (WANDEL_PYBIND_LIBRARY_FILEPATH "${CMAKE_CURRENT_BINARY_DIR}/${PYBIND_LIBRARY_NAME}")
 endif ()
 add_definitions (-DPYBIND_MODULE_NAME=${PYBIND_MODULE_NAME})
@@ -97,21 +93,21 @@ add_subdirectory (dep/pybind11)
 include_directories (
 	"${PROJECT_SOURCE_DIR}/dep/pybind11/include")
 pybind11_add_module (${PYBIND_MODULE_NAME} "${PROJECT_SOURCE_DIR}/src/python/pywandel.cpp")
-target_link_libraries (${PYBIND_MODULE_NAME} PUBLIC SmallFBX WandelLib pybind11::module pybind11::lto pybind11::windows_extras)
+target_link_libraries (${PYBIND_MODULE_NAME}
+	PUBLIC SmallFBX WandelLib pybind11::module pybind11::lto pybind11::windows_extras)
 add_custom_command(
     TARGET ${PYBIND_MODULE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_SOURCE_DIR}/python
+            "${CMAKE_SOURCE_DIR}/python"
             "${WANDEL_MODULE_OUTPATH}")
+add_custom_command(
+    TARGET ${PYBIND_MODULE_NAME}
+    COMMAND ${CMAKE_COMMAND} -E echo ${WANDEL_PYBIND_LIBRARY_FILEPATH})
 add_custom_command(
     TARGET ${PYBIND_MODULE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
             "${WANDEL_PYBIND_LIBRARY_FILEPATH}"
             "${WANDEL_MODULE_OUTPATH}/src/wandel_cli")
-add_custom_command(
-    TARGET ${PYBIND_MODULE_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E rm
-            "${CMAKE_CURRENT_BINARY_DIR}/Release/${PYBIND_LIBRARY_NAME}")
 
 add_executable (Verwandlung "${PROJECT_SOURCE_DIR}/src/cli/main.cpp")
 target_link_libraries (Verwandlung WandelLib)
