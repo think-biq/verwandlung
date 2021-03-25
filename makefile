@@ -11,28 +11,58 @@ PROJECT_DIR := $(shell dirname $(FILE_PATH))
 PROJECT_NAME := $(notdir $(patsubst %/,%,$(dir $(FILE_PATH))))
 
 DEBUG_FLAG :=
+BUILD_PATH = "${PROJECT_DIR}/build"
 
 ifeq '$(findstring ;,$(PATH))' ';'
 	OS = "win"
+	VENV_BIN_DIR = "$(PROJECT_DIR)/Scripts"
 	STD_FLAG = "/std:c++17 /EHa"
-	EXE_PATH = build/Release/./Verwandlung.exe
-	EXE_PATH_RAW = build/Release/Verwandlung.exe
+	EXE_NAME = Verwandlung.exe
+	BUILD_PATH_RELEASE = "${BUILD_PATH}/Release"
+	EXE_PATH_RELEASE = "${BUILD_PATH_RELEASE}/${EXE_NAME}"
+	BUILD_PATH_DEBUG = "${BUILD_PATH}/Debug"
+	EXE_PATH_DEBUG = "${BUILD_PATH_DEBUG}/${EXE_NAME}"
 	LLDB = lldb
 	PYTHON = python
 	PYTHON_EXECUTABLE := "${shell $(PYTHON) -c "import sys; print(sys.executable)"}"
 else
 	OS = "unix-y"
+	VENV_BIN_DIR = "$(PROJECT_DIR)/bin/activate"
 	STD_FLAG = "--std=c++17"
-	EXE_PATH = build/./Verwandlung
-	EXE_PATH_RAW = build/Verwandlung
+	EXE_NAME = Verwandlung
+	BUILD_PATH_RELEASE = "${BUILD_PATH}"
+	EXE_PATH_RELEASE = "${BUILD_PATH_RELEASE}/${EXE_NAME}"
+	BUILD_PATH_DEBUG = "${BUILD_PATH}"
+	EXE_PATH_DEBUG = "${BUILD_PATH_DEBUG}/${EXE_NAME}"
 	LLDB = lldb
 	PYTHON := python3
 	PYTHON_EXECUTABLE := $(shell which $(PYTHON))
 endif
 
-.default: setup-env
 
-setup-env:
+default: build
+
+
+$(VENV_BIN_DIR): # creates target which only gets triggered if directory does not exist
+	@echo "Creating venv ..."
+	@$(PYTHON) -m venv "$(PROJECT_DIR)"
+
+venv-upgrade: $(VENV_BIN_DIR)
+	@echo "Upgrading venv ..."
+	@$(PYTHON) -m venv --upgrade "$(PROJECT_DIR)"
+	@. "$(PROJECT_DIR)/bin/activate"; $(PYTHON) -m pip install -U -r "$(PROJECT_DIR)/requirements.txt"
+
+venv-remove: 
+	@echo "Removing venv ..."
+	@rm -rf "$(PROJECT_DIR)/bin"
+	@rm -rf "$(PROJECT_DIR)/include"
+	@rm -rf "$(PROJECT_DIR)/lib"
+	@rm -rf "$(PROJECT_DIR)/pyvenv.cfg"
+
+list-venv-packages:
+	@. "$(PROJECT_DIR)/bin/activate"; $(PYTHON) -m pip list
+
+setup-env: venv-upgrade
 	mkdir -p ./tmp ./bin
 	mkdir -p ./build
 	@echo PROJECT_DIR:$(PROJECT_DIR)
@@ -42,29 +72,36 @@ setup-env:
 	@echo PYTHON_EXECUTABLE: $(PYTHON_EXECUTABLE)
 
 setup-cmake-release:
-	pushd ./build; cmake -DPYTHON_EXECUTABLE=$(PYTHON_EXECUTABLE) -DCMAKE_CXX_FLAGS=$(STD_FLAG) ..
+	pushd "${BUILD_PATH}"; . "${VENV_BIN_DIR}"; cmake -DPYTHON_EXECUTABLE=$(PYTHON_EXECUTABLE) -DCMAKE_CXX_FLAGS=$(STD_FLAG) ..
 
 setup-cmake-debug:
-	pushd ./build; cmake -DPYTHON_EXECUTABLE=$(PYTHON_EXECUTABLE) -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_CXX_FLAGS=$(STD_FLAG) ..
+	pushd "${BUILD_PATH}"; . "${VENV_BIN_DIR}"; cmake -DPYTHON_EXECUTABLE=$(PYTHON_EXECUTABLE) -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_CXX_FLAGS=$(STD_FLAG) ..
 
 setup-release: setup-env setup-cmake-release
 
 setup-debug: setup-env setup-cmake-debug
 
 build-release: setup-release
-	pushd ./build; cmake --build . --config Release
+	pushd "${BUILD_PATH}"; . "${VENV_BIN_DIR}"; cmake --build . --config Release
 
 build-debug: setup-debug
-	pushd ./build; cmake --build . --config Debug
+	pushd "${BUILD_PATH}"; . "${VENV_BIN_DIR}"; cmake --build . --config Debug
 
-clean-smallfbx:
-	rm -rf ./dep/SmallFBX/build
+build-wheel-release:
+	@pushd "${BUILD_PATH_RELEASE}/wandel"; . "${VENV_BIN_DIR}"; $(PYTHON) setup.py bdist_wheel
+
+build-wheel-debug:
+	echo "WOOT?"
+	@pushd "${BUILD_PATH_DEBUG}/wandel"; . "${VENV_BIN_DIR}"; $(PYTHON) setup.py bdist_wheel
 
 clean:
-	rm -rf ./tmp ./bin
-	rm -rf ./build
+	@echo "Removing build artefacts ..."
+	@rm -rf "$(PROJECT_DIR)/tmp"
+	@rm -rf "$(PROJECT_DIR)/build"
 
-clean-all: clean-smallfbx clean 
+clean-all: venv-remove clean
+
+build: build-release build-wheel-release
 
 run: build-release
 	$(EXE_PATH) --list ./etc/fbx/OldFace.fbx
