@@ -99,15 +99,6 @@ build-release: setup-release
 build-debug: setup-debug
 	pushd ${BUILD_PATH}; $(CMD_ACTIVATE_VENV); cmake --build . --config Debug
 
-build-wheel-release:
-	@pushd "${BUILD_PATH_RELEASE}/src/${PYBIND_WANDEL_MODULE_NAME}/package"; \
-		$(CMD_ACTIVATE_VENV); $(PYTHON) setup.py bdist_wheel
-
-build-wheel-debug:
-	echo "WOOT?"
-	@pushd "${BUILD_PATH_DEBUG}/src/${PYBIND_WANDEL_MODULE_NAME}/package"; \
-		$(CMD_ACTIVATE_VENV); $(PYTHON) setup.py bdist_wheel
-
 clean:
 	@echo "Removing build artefacts ..."
 	@rm -rf "$(PROJECT_DIR)/tmp"
@@ -115,7 +106,7 @@ clean:
 
 clean-all: venv-remove clean
 
-build: build-release build-wheel-release
+build: build-release
 
 run: build-release
 	$(EXE_PATH) --list ./etc/fbx/OldFace.fbx

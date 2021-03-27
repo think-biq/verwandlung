@@ -38,3 +38,6 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy
             "${python_wandel_PYBIND_LIBRARY_FILEPATH}"
             "${python_wandel_PACKAGE_OUTPATH}/src")
+add_custom_command(
+    TARGET ${PYBIND_MODULE_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E chdir "${python_wandel_PACKAGE_OUTPATH}" ${PYTHON} setup.py bdist_wheel)
