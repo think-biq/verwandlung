@@ -18,15 +18,15 @@ with open(os.path.join(PROJECT_PATH, 'readme.md'), 'r') as fh:
 
 setuptools.setup(
     python_requires='>=3.9',
-    name="smallfbx",
+    name="wandel",
     version=version(),
-    description="Python binding for SmallFBX library.",
+    description="Utility to inspect FBX files.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    package_dir = {'smallfbx': 'src'},
-    packages=['smallfbx'],
+    package_dir = {'wandel': 'src'},
+    packages=['wandel'],
     include_package_data=True,    
-    package_data={'smallfbx': ['*.pyd', '*.so']},
+    package_data={'wandel': ['*.pyd', '*.so']},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
@@ -34,5 +34,5 @@ setuptools.setup(
     ],
     author="biq",
     author_email="sf@think-biq.com",
-    url="https://gitlab.com/think-biq/python-smallfbx"
+    url="https://gitlab.com/think-biq/python-wandel"
 )

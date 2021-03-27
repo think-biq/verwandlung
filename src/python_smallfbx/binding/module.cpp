@@ -28,23 +28,23 @@ PYBIND11_MODULE(PYBIND_MODULE_NAME, m) {
 	}
 
 	// Expose WandleMode enum.
-	py::enum_<sfxb::FileVersion>(m, "FileVersion")
-		.value("Fbx2014", sfxb::FileVersion::Fbx2014)
-		.value("Fbx2015", sfxb::FileVersion::Fbx2015)
-		.value("Fbx2016", sfxb::FileVersion::Fbx2016)
-		.value("Fbx2017", sfxb::FileVersion::Fbx2017)
-		.value("Fbx2018", sfxb::FileVersion::Fbx2018)
-		.value("Fbx2019", sfxb::FileVersion::Fbx2019)
-		.value("Fbx2020", sfxb::FileVersion::Fbx2020)
-		.value("Default", sfxb::FileVersion::Default)
+	py::enum_<sfbx::FileVersion>(m, "FileVersion")
+		.value("Fbx2014", sfbx::FileVersion::Fbx2014)
+		.value("Fbx2015", sfbx::FileVersion::Fbx2015)
+		.value("Fbx2016", sfbx::FileVersion::Fbx2016)
+		.value("Fbx2017", sfbx::FileVersion::Fbx2017)
+		.value("Fbx2018", sfbx::FileVersion::Fbx2018)
+		.value("Fbx2019", sfbx::FileVersion::Fbx2019)
+		.value("Fbx2020", sfbx::FileVersion::Fbx2020)
+		.value("Default", sfbx::FileVersion::Default)
 		.export_values()
 		;
 
 	//
 	py::class_<sfbx::Document>(m, "Document")
 		.def(py::init<std::string>()) // Empty default constructor.
-		.def("isValid", &sfbx::Document::isValid)
-		.def("getVersion", &sfbx::Document::getVersion)
+		.def("is_valid", &sfbx::Document::valid)
+		.def("get_vesion", &sfbx::Document::getVersion)
 		;
 
 #if 0
