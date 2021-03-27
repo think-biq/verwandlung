@@ -102,11 +102,13 @@ build-debug: setup-debug
 	pushd ${BUILD_PATH}; $(CMD_ACTIVATE_VENV); cmake --build . --config Debug
 
 build-wheel-release:
-	@pushd "${BUILD_PATH_RELEASE}/${PYBIND_WANDEL_MODULE_NAME}"; $(CMD_ACTIVATE_VENV); $(PYTHON) setup.py bdist_wheel
+	@pushd "${BUILD_PATH_RELEASE}/src/${PYBIND_WANDEL_MODULE_NAME}/package"; \
+		$(CMD_ACTIVATE_VENV); $(PYTHON) setup.py bdist_wheel
 
 build-wheel-debug:
 	echo "WOOT?"
-	@pushd "${BUILD_PATH_DEBUG}/${PYBIND_WANDEL_MODULE_NAME}"; $(CMD_ACTIVATE_VENV); $(PYTHON) setup.py bdist_wheel
+	@pushd "${BUILD_PATH_DEBUG}/src/${PYBIND_WANDEL_MODULE_NAME}/package"; \
+		$(CMD_ACTIVATE_VENV); $(PYTHON) setup.py bdist_wheel
 
 clean:
 	@echo "Removing build artefacts ..."

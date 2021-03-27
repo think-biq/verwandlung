@@ -34,7 +34,7 @@ include_directories ("${PROJECT_SOURCE_DIR}/dep/attr")
 
 add_subdirectory (dep/zlib)
 
-include_directories (
+set (SMALLFBX_INCLUDE_DIR
 	"${PROJECT_SOURCE_DIR}/dep/SmallFBX/src"
 	"${PROJECT_SOURCE_DIR}/dep/SmallFBX/src/SmallFBX")
 file (GLOB SMALLFBX_SRC 
@@ -46,7 +46,7 @@ add_library (SmallFBX STATIC
 target_include_directories (SmallFBX PRIVATE 
     "${PROJECT_SOURCE_DIR}/dep/zlib"
     "${PROJECT_SOURCE_DIR}/build/dep/zlib"
-    ${SMALLFBX_SRC}
+    ${SMALLFBX_INCLUDE_DIR}
 )
 if (WIN32)
 target_link_libraries (SmallFBX PUBLIC zlibstatic)
@@ -55,32 +55,32 @@ target_link_libraries (SmallFBX PUBLIC z)
 endif ()
 
 set (WANDEL_SRC_DIR "${PROJECT_SOURCE_DIR}/src/wandel")
+set (WANDEL_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/src/wandel")
 file (GLOB WANDEL_SRC
 	"${WANDEL_SRC_DIR}/*.h"
 	"${WANDEL_SRC_DIR}/*.cpp")
 add_library (WandelLib STATIC ${WANDEL_SRC})
-include_directories (${WANDEL_SRC_DIR})
-target_include_directories (WandelLib PRIVATE 
+#include_directories (${WANDEL_SRC_DIR})
+target_include_directories (WandelLib PUBLIC 
     "${PROJECT_SOURCE_DIR}/dep/zlib"
-    ${SMALLFBX_SRC}
-	${WANDEL_SRC}
+    ${SMALLFBX_INCLUDE_DIR}
+	${WANDEL_INCLUDE_DIR}
 )
 target_link_libraries (WandelLib PUBLIC SmallFBX)
 
 # Build pybind11
 add_subdirectory (dep/pybind11)
-# Configre suffix naming convention for pyd library.
+
+#[[# Configre suffix naming convention for pyd library.
 if (WIN32)
 	set (pybind11_LIB_SUFFIX .cp39-win_amd64.pyd)
 else ()
-#[[execute_process(COMMAND PYTHON tools/python3-config --extension-suffix
-                OUTPUT_VARIABLE pybind11_LIB_SUFFIX OUTPUT_STRIP_TRAILING_WHITESPACE)]]
     set (pybind11_LIB_SUFFIX .cpython-39-darwin.so)
-endif ()
+endif ()]]
 
 #[[set (PYTHON_MODULE_NAME )
 set (PYBIND_MODULE_NAME ${PYBIND_WANDEL_MODULE_NAME})]]
-set (PYBIND_LIBRARY_NAME "${PYBIND_MODULE_NAME}${pybind11_LIB_SUFFIX}")
+#[[set (PYBIND_LIBRARY_NAME "${PYBIND_MODULE_NAME}${pybind11_LIB_SUFFIX}")
 if (WIN32)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set (WANDEL_MODULE_OUTPATH "${CMAKE_CURRENT_BINARY_DIR}/Debug/${PYBIND_MODULE_NAME}")
@@ -93,7 +93,7 @@ else ()
 	set (WANDEL_MODULE_OUTPATH "${CMAKE_CURRENT_BINARY_DIR}/${PYBIND_MODULE_NAME}")
 	set (WANDEL_PYBIND_LIBRARY_FILEPATH "${CMAKE_CURRENT_BINARY_DIR}/${PYBIND_LIBRARY_NAME}")
 endif ()
-pybind11_add_module (${PYBIND_MODULE_NAME} "${PROJECT_SOURCE_DIR}/src/${PYBIND_MODULE_NAME}/module.cpp")
+pybind11_add_module (${PYBIND_MODULE_NAME} "${PROJECT_SOURCE_DIR}/src/${PYBIND_MODULE_NAME}/binding/module.cpp")
 target_compile_definitions (${PYBIND_MODULE_NAME} PRIVATE PYBIND_MODULE_NAME=${PYBIND_MODULE_NAME})
 target_include_directories (${PYBIND_MODULE_NAME} PRIVATE
 	"${pybind11_INCLUDE_DIR}")
@@ -111,7 +111,15 @@ add_custom_command(
     TARGET ${PYBIND_MODULE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
             "${WANDEL_PYBIND_LIBRARY_FILEPATH}"
-            "${WANDEL_MODULE_OUTPATH}/src/${PYBIND_LIBRARY_NAME}")
+            "${WANDEL_MODULE_OUTPATH}/src/${PYBIND_LIBRARY_NAME}")]]
+
+
+add_subdirectory (src/python_wandel)
+target_include_directories (WandelLib PUBLIC	
+    ${SMALLFBX_INCLUDE_DIR}
+	${WANDEL_INCLUDE_DIR})
+target_link_libraries (python_wandel
+	PUBLIC SmallFBX WandelLib)
 
 
 add_executable (Verwandlung "${PROJECT_SOURCE_DIR}/src/cli/main.cpp")
