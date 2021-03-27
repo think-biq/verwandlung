@@ -67,7 +67,9 @@ target_include_directories (WandelLib PRIVATE
 )
 target_link_libraries (WandelLib PUBLIC SmallFBX)
 
-set (PYBIND_MODULE_NAME ${PYBIND_WANDEL_MODULE_NAME})
+# Build pybind11
+add_subdirectory (dep/pybind11)
+# Configre suffix naming convention for pyd library.
 if (WIN32)
 	set (pybind11_LIB_SUFFIX .cp39-win_amd64.pyd)
 else ()
@@ -75,6 +77,9 @@ else ()
                 OUTPUT_VARIABLE pybind11_LIB_SUFFIX OUTPUT_STRIP_TRAILING_WHITESPACE)]]
     set (pybind11_LIB_SUFFIX .cpython-39-darwin.so)
 endif ()
+
+
+set (PYBIND_MODULE_NAME ${PYBIND_WANDEL_MODULE_NAME})
 set (PYBIND_LIBRARY_NAME "${PYBIND_MODULE_NAME}${pybind11_LIB_SUFFIX}")
 if (WIN32)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -89,7 +94,6 @@ else ()
 	set (WANDEL_PYBIND_LIBRARY_FILEPATH "${CMAKE_CURRENT_BINARY_DIR}/${PYBIND_LIBRARY_NAME}")
 endif ()
 add_definitions (-DPYBIND_MODULE_NAME=${PYBIND_MODULE_NAME})
-add_subdirectory (dep/pybind11)
 include_directories (
 	"${PROJECT_SOURCE_DIR}/dep/pybind11/include")
 pybind11_add_module (${PYBIND_MODULE_NAME} "${PROJECT_SOURCE_DIR}/src/python/pywandel.cpp")
