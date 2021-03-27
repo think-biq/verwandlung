@@ -78,8 +78,8 @@ else ()
     set (pybind11_LIB_SUFFIX .cpython-39-darwin.so)
 endif ()
 
-
-set (PYBIND_MODULE_NAME ${PYBIND_WANDEL_MODULE_NAME})
+#[[set (PYTHON_MODULE_NAME )
+set (PYBIND_MODULE_NAME ${PYBIND_WANDEL_MODULE_NAME})]]
 set (PYBIND_LIBRARY_NAME "${PYBIND_MODULE_NAME}${pybind11_LIB_SUFFIX}")
 if (WIN32)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -93,16 +93,16 @@ else ()
 	set (WANDEL_MODULE_OUTPATH "${CMAKE_CURRENT_BINARY_DIR}/${PYBIND_MODULE_NAME}")
 	set (WANDEL_PYBIND_LIBRARY_FILEPATH "${CMAKE_CURRENT_BINARY_DIR}/${PYBIND_LIBRARY_NAME}")
 endif ()
-add_definitions (-DPYBIND_MODULE_NAME=${PYBIND_MODULE_NAME})
-include_directories (
-	"${PROJECT_SOURCE_DIR}/dep/pybind11/include")
-pybind11_add_module (${PYBIND_MODULE_NAME} "${PROJECT_SOURCE_DIR}/src/python/pywandel.cpp")
+pybind11_add_module (${PYBIND_MODULE_NAME} "${PROJECT_SOURCE_DIR}/src/${PYBIND_MODULE_NAME}/module.cpp")
+target_compile_definitions (${PYBIND_MODULE_NAME} PRIVATE PYBIND_MODULE_NAME=${PYBIND_MODULE_NAME})
+target_include_directories (${PYBIND_MODULE_NAME} PRIVATE
+	"${pybind11_INCLUDE_DIR}")
 target_link_libraries (${PYBIND_MODULE_NAME}
 	PUBLIC SmallFBX WandelLib pybind11::module pybind11::lto pybind11::windows_extras)
 add_custom_command(
     TARGET ${PYBIND_MODULE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${CMAKE_SOURCE_DIR}/python"
+            "${CMAKE_SOURCE_DIR}/src/${PYBIND_MODULE_NAME}/package"
             "${WANDEL_MODULE_OUTPATH}")
 add_custom_command(
     TARGET ${PYBIND_MODULE_NAME}
@@ -111,7 +111,8 @@ add_custom_command(
     TARGET ${PYBIND_MODULE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
             "${WANDEL_PYBIND_LIBRARY_FILEPATH}"
-            "${WANDEL_MODULE_OUTPATH}/src/wandel_cli")
+            "${WANDEL_MODULE_OUTPATH}/src/${PYBIND_LIBRARY_NAME}")
+
 
 add_executable (Verwandlung "${PROJECT_SOURCE_DIR}/src/cli/main.cpp")
 target_link_libraries (Verwandlung WandelLib)

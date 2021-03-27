@@ -23,10 +23,10 @@ setuptools.setup(
     description="Utility to inspect FBX files.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    package_dir = {'wandel': 'src', 'wandel_cli': 'src/wandel_cli'},
-    packages=['wandel', 'wandel_cli'],
+    package_dir = {'wandel': 'src'},
+    packages=['wandel'],
     include_package_data=True,    
-    package_data={'wandel_cli': ['pywandel.*.pyd', 'pywandel.*.so']},
+    package_data={'wandel': ['*.pyd', '*.so']},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

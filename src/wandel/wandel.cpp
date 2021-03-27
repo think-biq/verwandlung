@@ -285,8 +285,9 @@ bool Wandel(const std::string& Filepath, WandelParams Params) {
 	const sfbx::AnimationLayer* PrimeLayer = Layers[0];
 	switch(Params.Mode) {
 		case WandelMode::List:
-			bSuccess = ListBlendshapesFrom(PrimeLayer, MatchType, 0);
-		break;
+			ShowInfo(doc->getRootModel(), std::cout, true, 2);
+				//bSuccess = ListBlendshapesFrom(PrimeLayer, MatchType, 0);
+				break;
 		case WandelMode::Export:
 			bSuccess = ExportCurvesFrom(PrimeLayer, MatchType);
 		break;
