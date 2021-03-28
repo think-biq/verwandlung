@@ -31,6 +31,10 @@ make clean build
 
 Will configure and setup cmake build script generation in 'Release' mode, create a python virtual environment, install dependencies, build the dependencies, build pybind wrapper modules and verwandlung tools.
 
+#### Python Wheels
+
+After building the dependencies and libraries, the build script will create wheel (.whl) distribution packages. The will be put into 'build/src/python_smallfbx/package/dist' on macOS, or 'build/src/python_smallfbx/{Release,Debug}package/dist' (depending on your build profile) respectivly.
+
 ### Test
 
 #### Prerequisits
