@@ -13,6 +13,7 @@
 #include <string>
 #include <memory>
 #include <iostream>
+#include <functional>
 
 #include <SmallFBX/sfbxRawVector.h>
 #include <SmallFBX/sfbxObject.h>
