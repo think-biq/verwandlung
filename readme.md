@@ -10,6 +10,11 @@ Library and tools to inspect and transform FBX files.
 * cmake >3.19
 * c++ build environment
 
+### Platforms
+
+* windows 10
+* macOS 10.15.*
+
 ### Get the source
 
 Fetch repository and dependencies / submodules.
