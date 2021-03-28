@@ -31,6 +31,8 @@ def main(args):
 			print(f'{l.name()}[{l.full_name()}] @ {l.id()}')
 			for cn in l.curve_nodes():
 				print(f'{cn.name()}[{cn.full_name()}] @ {cn.id()}: {cn.kind()} -> {cn.target().id()}')
+				if cn.kind() == sfbx.AnimationKind.DeformWeight:
+					print('Found deformer!')
 				for c in cn.curves():
 					print(f'{c.name()}[{c.full_name()}] @ {c.id()}: ')
 

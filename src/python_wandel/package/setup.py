@@ -8,13 +8,23 @@
 """
 
 import setuptools
+import setuptools.dist
 import os
 from src import version
 
-PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
 
+PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(PROJECT_PATH, 'readme.md'), 'r') as fh:
     long_description = fh.read()
+
+
+class BinaryDistribution(setuptools.dist.Distribution):
+    """
+    Distribution which always forces a binary package with platform name.
+    Thanks to https://stackoverflow.com/a/36886459/949561
+    """
+    def has_ext_modules(foo):
+        return True
 
 setuptools.setup(
     python_requires='>=3.9',
@@ -34,5 +44,6 @@ setuptools.setup(
     ],
     author="biq",
     author_email="sf@think-biq.com",
-    url="https://gitlab.com/think-biq/python-wandel"
+    url="https://gitlab.com/think-biq/python-wandel",
+    distclass=BinaryDistribution
 )
