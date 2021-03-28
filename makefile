@@ -112,10 +112,20 @@ build: build-release
 debug: build-debug
 	$(LLDB) -- $(EXE_PATH_RAW) --list ./etc/fbx/Gunan_animiated.fbx
 
-test-smallfbx:
-	$(CMD_ACTIVATE_VENV); make -C ${BUILD_PATH} python_smallfbx_test
+test-smallfbx-release:
+	$(CMD_ACTIVATE_VENV); cmake --build ${BUILD_PATH} --config "Release" --target python_smallfbx_test
 
-test-wandel:
-	$(CMD_ACTIVATE_VENV); make -C ${BUILD_PATH} python_wandel_test
+test-wandel-release:
+	$(CMD_ACTIVATE_VENV); cmake --build ${BUILD_PATH} --config "Release" --target python_wandel_test
 
-test: test-smallfbx test-wandel
+test-release: test-smallfbx-release test-wandel-release
+
+test-smallfbx-debug:
+	$(CMD_ACTIVATE_VENV); cmake --build ${BUILD_PATH} --config "Debug" --target python_smallfbx_test
+
+test-wandel-debug:
+	$(CMD_ACTIVATE_VENV); cmake --build ${BUILD_PATH} --config "Debug" --target python_wandel_test
+
+test-deubg: test-smallfbx-debug test-wandel-debug
+
+test: test-release
