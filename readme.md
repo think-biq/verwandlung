@@ -8,7 +8,8 @@ Library and tools to inspect and transform FBX files.
 
 * python >3.9
 * cmake >3.19
-* c++ build environment
+* make >3.81 (checkout [scoop](https://scoop.sh/) for [make](https://github.com/ScoopInstaller/Main/blob/master/bucket/make.json) on windows)
+* c++17 compatible build environment
 
 ### Platforms
 
