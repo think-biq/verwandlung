@@ -42,6 +42,8 @@ endif
 
 CMD_ACTIVATE_VENV = . "$(PROJECT_DIR)/$(VENV_BIN_DIR)/activate"
 
+SMALLFBX_VERSION = $(shell dirname $(FILE_PATH))
+
 
 default: build
 
@@ -113,3 +115,6 @@ run: build-release
 
 debug: build-debug
 	$(LLDB) -- $(EXE_PATH_RAW) --list ./etc/fbx/Gunan_animiated.fbx
+
+test:
+	$(CMD_ACTIVATE_VENV); make -C ${BUILD_PATH} python_smallfbx_test

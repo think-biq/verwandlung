@@ -28,7 +28,7 @@ target_include_directories (${PYBIND_MODULE_NAME} PRIVATE
 	"${pybind11_INCLUDE_DIR}")
 target_link_libraries (${PYBIND_MODULE_NAME}
 	PUBLIC pybind11::module pybind11::lto pybind11::windows_extras)
-
+# Copy package and binary module for distribution.
 add_custom_command(
     TARGET ${PYBIND_MODULE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -39,7 +39,15 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy
             "${python_smallfbx_PYBIND_LIBRARY_FILEPATH}"
             "${python_smallfbx_PACKAGE_OUTPATH}/src")
+# Then package.
 add_custom_command(
     TARGET ${PYBIND_MODULE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E chdir "${python_smallfbx_PACKAGE_OUTPATH}" ${PYTHON} setup.py bdist_wheel)
 
+
+# Test.
+add_custom_target(${PYBIND_MODULE_NAME}_test
+     COMMAND ${PYTHON} -m pip install --force-reinstall "${python_smallfbx_PACKAGE_OUTPATH}"
+     COMMAND ${PYTHON} "${PROJECT_SOURCE_DIR}/test/main.py" ${CMAKE_SOURCE_DIR}/etc/fbx/Gunan_animated.fbx
+)
+add_dependencies(${PYBIND_MODULE_NAME}_test ${PYBIND_MODULE_NAME})
