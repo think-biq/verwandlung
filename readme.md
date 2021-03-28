@@ -26,10 +26,22 @@ git clone --recursive https://github.com/think-biq/verwandlung.git
 ### Build
 
 ```bash
-make clean build test
+make clean build
 ```
 
-Will configure and setup cmake build script generation, create a python virtual environment, install dependencies, build the dependencies, build pybind wrapper modules and verwandlung tools.
+Will configure and setup cmake build script generation in 'Release' mode, create a python virtual environment, install dependencies, build the dependencies, build pybind wrapper modules and verwandlung tools.
+
+### Test
+
+#### Prerequisits
+
+Checkout the instructions in [etc/fbx/zophrac-9fea6ffd67b840cb970f5b4570794709.fbx](etc/fbx/zophrac-9fea6ffd67b840cb970f5b4570794709.fbx) on how to obtain the FBX used in the tests.
+
+```bash
+make test
+```
+
+Will install python packages from build directory in virtual environment and run the test scripts.
 
 ## Components
 
