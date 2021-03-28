@@ -13,18 +13,19 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE PATH "" FORCE)
 endif()
 
+## Helper function to append parameters / options.
+function(append_if condition value)
+  if (${condition})
+    foreach(variable ${ARGN})
+      set(${variable} "${${variable}} ${value}" PARENT_SCOPE)
+    endforeach(variable)
+  endif()
+endfunction()
 # Check if we can declare inline declarations as hidden, to unify clang visiblity.
 # Thanks to https://github.com/Maroc-OS/retdec/pull/2/commits/0f90931787ee707a9579827b4869551cc4ab7de8
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
 		CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR
 		CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-	function(append_if condition value)
-	  if (${condition})
-	    foreach(variable ${ARGN})
-	      set(${variable} "${${variable}} ${value}" PARENT_SCOPE)
-	    endforeach(variable)
-	  endif()
-	endfunction()
 	include(CheckCXXCompilerFlag)
 	check_cxx_compiler_flag("-fvisibility-inlines-hidden" SUPPORTS_FVISIBILITY_INLINES_HIDDEN_FLAG)
 	append_if(SUPPORTS_FVISIBILITY_INLINES_HIDDEN_FLAG "-fvisibility-inlines-hidden" CMAKE_CXX_FLAGS)
