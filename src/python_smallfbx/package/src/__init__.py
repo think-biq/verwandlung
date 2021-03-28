@@ -30,7 +30,7 @@ __all__ = [
 ]
 
 _SmallFBX_Version = '2021.3.16'
-_version = 4
+_version = 5
 
 def version():
 	return f'{_SmallFBX_Version}.{_version}'
