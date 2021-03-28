@@ -1,0 +1,30 @@
+{
+	"folders":
+	[
+		{
+			"path": ".."
+		}
+	],
+	"license": "Utility to inspect FBX files.\n\n2021-∞ (c) blurryroots innovation qanat OÜ. All rights reserved.\nSee license.md for details.\n\nhttps://think-biq.com",
+	"settings":
+	{
+		"sublime-lldb":
+		{
+			"targets":
+			[
+				{
+					"arguments":
+					[
+						"--list",
+						"./etc/fbx/Gunan_animated.fbx"
+					],
+					"environment":
+					{
+						"PATH": "$PATH"
+					},
+					"executable_path": "./build/Verwandlung"
+				}
+			]
+		}
+	}
+}
