@@ -9,7 +9,9 @@
 
 #include <pybind11/pybind11.h>	// Base functions.
 #include <pybind11/stl.h>		// C++ STL conversions.
+
 #include <string>
+
 #include <wandel.hpp>
 
 #define SymbolToString(Symbol) #Symbol

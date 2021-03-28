@@ -18,6 +18,9 @@ Scripts/
 pyvenv.cfg
 
 #
+*.pyc
+
+#
 *.sublime-*
 
 #

@@ -36,12 +36,11 @@ include_directories ("${PROJECT_SOURCE_DIR}/dep/attr")
 add_subdirectory (dep/zlib)
 
 set (SMALLFBX_INCLUDE_DIR
-	"${PROJECT_SOURCE_DIR}/dep/SmallFBX/src"
-	"${PROJECT_SOURCE_DIR}/dep/SmallFBX/src/SmallFBX")
+	"${PROJECT_SOURCE_DIR}/dep/SmallFBX/src")
 file (GLOB SMALLFBX_SRC 
-	"${PROJECT_SOURCE_DIR}/dep/SmallFBX/src/*.h"
-	"${PROJECT_SOURCE_DIR}/dep/SmallFBX/src/SmallFBX/*.h"
-	"${PROJECT_SOURCE_DIR}/dep/SmallFBX/src/SmallFBX/*.cpp")
+	"${SMALLFBX_INCLUDE_DIR}/*.h"
+	"${SMALLFBX_INCLUDE_DIR}/SmallFBX/*.h"
+	"${SMALLFBX_INCLUDE_DIR}/SmallFBX/*.cpp")
 add_library (SmallFBX STATIC 
 	${SMALLFBX_SRC})
 target_include_directories (SmallFBX PRIVATE 

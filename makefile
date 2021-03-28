@@ -12,7 +12,6 @@ PROJECT_NAME := $(notdir $(patsubst %/,%,$(dir $(FILE_PATH))))
 
 DEBUG_FLAG :=
 BUILD_PATH = "${PROJECT_DIR}/build"
-PYBIND_WANDEL_MODULE_NAME = python_wandel
 
 ifeq '$(findstring ;,$(PATH))' ';'
 	OS = "win"
@@ -110,11 +109,13 @@ clean-all: venv-remove clean
 
 build: build-release
 
-run: build-release
-	$(EXE_PATH) --list ./etc/fbx/OldFace.fbx
-
 debug: build-debug
 	$(LLDB) -- $(EXE_PATH_RAW) --list ./etc/fbx/Gunan_animiated.fbx
 
-test:
+test-smallfbx:
 	$(CMD_ACTIVATE_VENV); make -C ${BUILD_PATH} python_smallfbx_test
+
+test-wandel:
+	$(CMD_ACTIVATE_VENV); make -C ${BUILD_PATH} python_wandel_test
+
+test: test-smallfbx test-wandel

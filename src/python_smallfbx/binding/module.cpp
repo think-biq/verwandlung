@@ -14,13 +14,13 @@
 #include <memory>
 #include <iostream>
 
-#include <sfbxRawVector.h>
-#include <sfbxObject.h>
-#include <sfbxAnimation.h>
-#include <sfbxDocument.h>
-#include <sfbxModel.h>
-#include <sfbxNode.h>
-#include <sfbxProperty.h>
+#include <SmallFBX/sfbxRawVector.h>
+#include <SmallFBX/sfbxObject.h>
+#include <SmallFBX/sfbxAnimation.h>
+#include <SmallFBX/sfbxDocument.h>
+#include <SmallFBX/sfbxModel.h>
+#include <SmallFBX/sfbxNode.h>
+#include <SmallFBX/sfbxProperty.h>
 
 #define SymbolToString(Symbol) #Symbol
 

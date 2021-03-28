@@ -9,8 +9,11 @@ def make_uuid(int_id):
 	return uuid.UUID(bytes=b'\x00'*8 + byte_id)
 
 
-def main():
-	filepath = sys.argv[1]
+def main(args):
+	if len(args) < 1:
+		raise Exception('Expect FBX as input for test ...')
+
+	filepath = args[1]
 
 	d = sfbx.Document(filepath)
 	print(f'FBX valid: {d.valid()}')
@@ -31,6 +34,5 @@ def main():
 				for c in cn.curves():
 					print(f'{c.name()}[{c.full_name()}] @ {c.id()}: ')
 
-
 if __name__ == '__main__':
-	main()
+	main(sys.argv)
